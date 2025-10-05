@@ -198,22 +198,6 @@ additional-hotkeys:
   # Permission: chestsort.hotkey.leftclick
   right-click: false
 
-##########################
-##### Update Checker #####
-##########################
-
-# Checks for updates (asynchronously).
-# When enabled, a message is printed in the console if a new
-# version has been found, and OPs will be notified when they join the server 
-# When set to true, check for updates on startup and every X hours (see "check-interval" below)
-# When set to on-startup, only check on server startup
-# When set to false, don't check for updates
-check-for-updates: true
-
-# When you set "check-for-updates" to true, you can define the amount
-# of hours inbetween each update check.
-check-interval: 4
-
 #########################
 #### Disabled Worlds ####
 #########################
@@ -240,61 +224,9 @@ disabled-worlds:
 # installed. ChestSort will automatically check if the plugins
 # are installed.
 
-##### CrackShot ##### -> https://www.spigotmc.org/resources/crackshot-guns.48301/
-# When CrackShot is installed, all CrackShot weapons will be
-# grouped together and sorted by their name
-hook-crackshot: true
-
-# You can define a custom name that will be used as prefix
-# for all CrackShot weapon names.
-# E.g. when you set this to "crackshot_weapon", an AK-47
-# will be called "crackshot_weapon_AK-47"
-hook-crackshot-prefix: "crackshot_weapon"
-
-##### InventoryPages ##### -> https://www.spigotmc.org/resources/inventorypages.32432/
-# When InventoryPages is installed, ChestSort will not sort
-# the "Next Page" and "Prev Page" buttons. You should not
-# disable this behaviour unless you know what you are doing!
-hook-inventorypages: true
-
-##### Minepacks ##### -> https://www.spigotmc.org/resources/minepacks-backpack-plugin-mc-1-7-1-15.19286/
-# When Minepacks version 2.3.8+ is installed, ChestSort can detect your
-# backpacks and sort them like a regular chest.
-hook-minepacks: true
-
-##### PlayerVaults and similar plugins #####
-# When PlayerVaults or similar plugins are installed, ChestSort can sort your
-# player vaults just like regular chests.
-hook-playervaults: true
-
-##### EnderContainers ##### -> https://www.spigotmc.org/resources/endercontainers.4750/
-# When EnderContainers version 2.2.1+ is installed, ChestSort can detect your
-# enderchests and sort them like regular chests.
-hook-endercontainers: true
-
-##### CrateReloaded #####
-# Prevents the player from using hotkeys on a crate
-hook-cratereloaded: true
-
-##### GoldenCrates #####
-# Prevents the player from using hotkeys on a crate
-hook-goldencrates: true
-
 ##### HeadDatabase #####
 # Prevents the player from using hotkeys on the HeadDatabase GUI
 hook-headdatabase: true
-
-##### Slimefun #####
-# Some versions of Slimefun fail to prevent putting the backpack into itself
-# when you do so immediately after ChestSort moved a backpack. You can
-# prevent ChestSort from moving Slimefun backpacks until they fixed this.
-dont-move-slimefun-backpacks: false
-
-##### AdvancedChests #####
-# When AdvancedChests is installed, ChestSort will not sort
-# the buttons from the bottom row. You should not
-# disable this behaviour unless you know what you are doing!
-hook-advancedchests: true
 
 ##### Other backpack plugins #####
 # ChestSort is able to detect backpacks from most backpack
@@ -354,7 +286,7 @@ blocked-inventory-holders-regex:
 # {keepCategoryOrder} orders stuff in the same category according to their line numbers in the category file
 # {itemsFirst}        put items before blocks
 # {blocksFirst}       put blocks before items
-# {tier}              orders by material type from best to worst (netherite, diamond, gold, iron, stone, wood, then all remaining items)
+# {tier}              orders by material type from best to worst (netherite, diamond, gold, iron, copper, stone, wood, then all remaining items)
 # {name}              returns the name (e.g. DIRT, GRASS_BLOCK, BIRCH_LOG, DIAMOND_SWORD, ...)
 # {color}             returns the color, e.g. light_blue for wool. Empty if block/item is not dyeable
 # {customName}        returns the display name if set (e.g. with an anvil)
@@ -376,9 +308,9 @@ blocked-inventory-holders-regex:
 #      '{category},{itemsFirst},{name},{color}'
 #
 #   sort by category, but keep exactly the same order as defined in each category file, then sort any undefined items by name and color
-#      '{category},{keepCategoryOrder},{name},{color}
+#      '{category},{keepCategoryOrder},{name},{color}'
 #
-sorting-method: '{category},{itemsFirst},{name},{color},{customName}'
+sorting-method: '{category},{itemsFirst},{tier},{name},{color},{customName}'
 
 #########################
 ##### Localization ######

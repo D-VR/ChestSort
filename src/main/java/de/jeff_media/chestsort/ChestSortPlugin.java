@@ -27,8 +27,6 @@
 
 package de.jeff_media.chestsort;
 
-import at.pcgamingfreaks.Minepacks.Bukkit.API.MinepacksPlugin;
-import com.jeff_media.updatechecker.UpdateChecker;
 import de.jeff_media.chestsort.commands.ChestSortCommand;
 import de.jeff_media.chestsort.commands.InvSortCommand;
 import de.jeff_media.chestsort.commands.TabCompleter;
@@ -45,17 +43,12 @@ import de.jeff_media.chestsort.handlers.ChestSortOrganizer;
 import de.jeff_media.chestsort.handlers.ChestSortPermissionsHandler;
 import de.jeff_media.chestsort.handlers.Debugger;
 import de.jeff_media.chestsort.handlers.Logger;
-import de.jeff_media.chestsort.hooks.EnderContainersHook;
 import de.jeff_media.chestsort.hooks.GenericGUIHook;
-import de.jeff_media.chestsort.hooks.PlayerVaultsHook;
 import de.jeff_media.chestsort.listeners.ChestSortListener;
 import de.jeff_media.chestsort.placeholders.Placeholders;
 import de.jeff_media.chestsort.utils.Utils;
-import com.jeff_media.jefflib.JeffLib;
 import com.jeff_media.jefflib.data.McVersion;
 import com.jeff_media.jefflib.NBTAPI;
-import io.papermc.lib.PaperLib;
-import org.bstats.bukkit.Metrics;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -70,32 +63,20 @@ import java.util.regex.Pattern;
 
 public class ChestSortPlugin extends JavaPlugin {
 
-    private static double updateCheckInterval = 4 * 60 * 60; // in seconds. We check on startup and every 4 hours
     private static ChestSortPlugin instance;
     public ChestSortOrganizer organizer; // Must be public for the API
     boolean hotkeyGUI = true;
-    private EnderContainersHook enderContainersHook;
     private GenericGUIHook genericHook;
-    private boolean hookCrackShot = false;
-    private boolean hookInventoryPages = false;
-    private boolean hookMinepacks = false;
-    private boolean hookAdvancedChests = false;
-    private PlayerVaultsHook playerVaultsHook;
     private boolean debug = false;
     private ArrayList<String> disabledWorlds;
     private HashMap<UUID, Long> hotkeyCooldown;
     private Logger lgr;
     private ChestSortListener chestSortListener;
-    // 1.14.4 = 1_14_R1
-    // 1.8.0  = 1_8_R1
-    private int mcMinorVersion; // 14 for 1.14, 13 for 1.13, ...
-    private String mcVersion;    // 1.13.2 = 1_13_R2
     private Messages messages;
     private Map<String, PlayerSetting> perPlayerSettings = new HashMap<>();
     private ChestSortPermissionsHandler permissionsHandler;
     private SettingsGUI settingsGUI;
     private String sortingMethod;
-    private UpdateChecker updateChecker;
     private boolean usingMatchingConfig = true;
     private boolean verbose = true;
     private YamlConfiguration guiConfig = new YamlConfiguration();
@@ -108,14 +89,6 @@ public class ChestSortPlugin extends JavaPlugin {
     }
 
     public YamlConfiguration getGuiConfig() { return guiConfig; }
-
-    public static double getUpdateCheckInterval() {
-        return updateCheckInterval;
-    }
-
-    public static void setUpdateCheckInterval(double updateCheckInterval) {
-        ChestSortPlugin.updateCheckInterval = updateCheckInterval;
-    }
 
     // Creates the default configuration file
     // Also checks the config-version of an already existing file. If the existing
@@ -221,14 +194,6 @@ public class ChestSortPlugin extends JavaPlugin {
         this.disabledWorlds = disabledWorlds;
     }
 
-    public EnderContainersHook getEnderContainersHook() {
-        return enderContainersHook;
-    }
-
-    public void setEnderContainersHook(EnderContainersHook enderContainersHook) {
-        this.enderContainersHook = enderContainersHook;
-    }
-
     public GenericGUIHook getGenericHook() {
         return genericHook;
     }
@@ -298,14 +263,6 @@ public class ChestSortPlugin extends JavaPlugin {
         return getPerPlayerSettings().get(p.getUniqueId().toString());
     }
 
-    public PlayerVaultsHook getPlayerVaultsHook() {
-        return playerVaultsHook;
-    }
-
-    public void setPlayerVaultsHook(PlayerVaultsHook playerVaultsHook) {
-        this.playerVaultsHook = playerVaultsHook;
-    }
-
     public SettingsGUI getSettingsGUI() {
         return settingsGUI;
     }
@@ -322,52 +279,12 @@ public class ChestSortPlugin extends JavaPlugin {
         this.sortingMethod = sortingMethod;
     }
 
-    public UpdateChecker getUpdateChecker() {
-        return updateChecker;
-    }
-
-    public void setUpdateChecker(UpdateChecker updateChecker) {
-        this.updateChecker = updateChecker;
-    }
-
     public boolean isDebug() {
         return debug;
     }
 
     public void setDebug(boolean debug) {
         this.debug = debug;
-    }
-
-    public boolean isHookCrackShot() {
-        return hookCrackShot;
-    }
-
-    public void setHookCrackShot(boolean hookCrackShot) {
-        this.hookCrackShot = hookCrackShot;
-    }
-
-    public boolean isHookInventoryPages() {
-        return hookInventoryPages;
-    }
-
-    public void setHookInventoryPages(boolean hookInventoryPages) {
-        this.hookInventoryPages = hookInventoryPages;
-    }
-
-    public boolean isHookMinepacks() {
-        return hookMinepacks;
-    }
-
-    public void setHookMinepacks(boolean hookMinepacks) {
-        this.hookMinepacks = hookMinepacks;
-    }
-
-    public boolean isHookAdvancedChests() {
-        return hookAdvancedChests;
-    }
-
-    public void setHookAdvancedChests(boolean hookAdvancedChests) {
-        this.hookAdvancedChests = hookAdvancedChests;
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
@@ -423,9 +340,6 @@ public class ChestSortPlugin extends JavaPlugin {
         if (reload) {
             unregisterAllPlayers();
             reloadConfig();
-            if (getUpdateChecker() != null) {
-                getUpdateChecker().stop();
-            }
         }
 
         createConfig();
@@ -437,18 +351,6 @@ public class ChestSortPlugin extends JavaPlugin {
             Debugger debugger = new Debugger(this);
             getServer().getPluginManager().registerEvents(debugger, this);
         }
-
-        setHookCrackShot(getConfig().getBoolean("hook-crackshot")
-                && Bukkit.getPluginManager().getPlugin("CrackShot") != null);
-
-        setHookInventoryPages(getConfig().getBoolean("hook-inventorypages")
-                && Bukkit.getPluginManager().getPlugin("InventoryPages") != null);
-
-        setHookMinepacks(getConfig().getBoolean("hook-minepacks")
-                && Bukkit.getPluginManager().getPlugin("Minepacks") instanceof MinepacksPlugin);
-
-        setHookAdvancedChests(getConfig().getBoolean("hook-advancedchests")
-                && Bukkit.getPluginManager().getPlugin("AdvancedChests") != null);
 
         setGenericHook(new GenericGUIHook(this, getConfig().getBoolean("hook-generic")));
 
@@ -471,30 +373,10 @@ public class ChestSortPlugin extends JavaPlugin {
         new Messages();
         setOrganizer(new ChestSortOrganizer(this));
         setSettingsGUI(new SettingsGUI(this));
-        try {
-            if (Class.forName("net.md_5.bungee.api.chat.BaseComponent") != null) {
-                setUpdateChecker(UpdateChecker.init(this, "https://api.jeff-media.de/chestsort/chestsort-latest-version.txt")
-                        .setChangelogLink("https://www.chestsort.de/changelog")
-                        .setDonationLink("https://paypal.me/mfnalex")
-                        .setDownloadLink("https://www.chestsort.de")
-                        .suppressUpToDateMessage(true));
-            } else {
-                getLogger().severe("You are using an unsupported server software! Consider switching to Spigot or Paper!");
-                getLogger().severe("The Update Checker will NOT work when using CraftBukkit instead of Spigot/Paper!");
-                PaperLib.suggestPaper(this);
-            }
-        } catch (ClassNotFoundException e) {
-            getLogger().severe("You are using an unsupported server software! Consider switching to Spigot or Paper!");
-            getLogger().severe("The Update Checker will NOT work when using CraftBukkit instead of Spigot/Paper!");
-            PaperLib.suggestPaper(this);
-        }
         setListener(new ChestSortListener(this));
         setHotkeyCooldown(new HashMap<>());
         setPermissionsHandler(new ChestSortPermissionsHandler(this));
-        setUpdateCheckInterval(getConfig().getDouble("check-interval"));
         setSortingMethod(getConfig().getString("sorting-method"));
-        setPlayerVaultsHook(new PlayerVaultsHook(this));
-        setEnderContainersHook(new EnderContainersHook(this));
         getServer().getPluginManager().registerEvents(getListener(), this);
         getServer().getPluginManager().registerEvents(getSettingsGUI(), this);
         getServer().getPluginManager().registerEvents(new GUIListener(), this);
@@ -530,27 +412,9 @@ public class ChestSortPlugin extends JavaPlugin {
                 getLogger().info("  |- Left-Click: " + getConfig().getBoolean("additional-hotkeys.left-click"));
                 getLogger().info("  |- Right-Click: " + getConfig().getBoolean("additional-hotkeys.right-click"));
             }
-            getLogger().info("Check for updates: " + getConfig().getString("check-for-updates"));
-            if (getConfig().getString("check-for-updates").equalsIgnoreCase("true")) {
-                getLogger().info("Check interval: " + getConfig().getString("check-interval") + " hours (" + getUpdateCheckInterval() + " seconds)");
-            }
             getLogger().info("Categories: " + getCategoryList());
         }
 
-        if (getUpdateChecker() != null) {
-            if (getConfig().getString("check-for-updates", "true").equalsIgnoreCase("true")) {
-                getUpdateChecker().checkEveryXHours(getUpdateCheckInterval()).checkNow();
-            } // When set to on-startup, we check right now (delay 0)
-            else if (getConfig().getString("check-for-updates", "true").equalsIgnoreCase("on-startup")) {
-                getUpdateChecker().checkNow();
-            }
-        }
-
-        if (getConfig().getString("check-for-updates").equalsIgnoreCase("false")) {
-            getUpdateChecker().setNotifyOpsOnJoin(false);
-        }
-
-        registerMetrics();
 
         if (getConfig().getBoolean("dump")) {
             dump();
@@ -581,73 +445,11 @@ public class ChestSortPlugin extends JavaPlugin {
 
         instance = this;
 
-        JeffLib.init(this);
-
-        /*String tmpVersion = getServer().getClass().getPackage().getName();
-        setMcVersion(tmpVersion.substring(tmpVersion.lastIndexOf('.') + 1));
-        tmpVersion = getMcVersion().substring(getMcVersion().indexOf("_") + 1);
-        setMcMinorVersion(Integer.parseInt(tmpVersion.substring(0, tmpVersion.indexOf("_"))));*/
-
-
-
         load(false);
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new Placeholders(this).register();
         }
-    }
-
-    private void registerMetrics() {
-        // Metrics will need json-simple with 1.14 API.
-        Metrics bStats = new Metrics(this, 3089);
-
-        bStats.addCustomChart(new Metrics.SimplePie("sorting_method", this::getSortingMethod));
-        bStats.addCustomChart(new Metrics.SimplePie("config_version",
-                () -> Integer.toString(getConfig().getInt("config-version", 0))));
-        bStats.addCustomChart(
-                new Metrics.SimplePie("check_for_updates", () -> getConfig().getString("check-for-updates", "true")));
-        bStats.addCustomChart(
-                new Metrics.SimplePie("update_interval", () -> Double.toString(getUpdateCheckInterval())));
-
-        bStats.addCustomChart(new Metrics.SimplePie("allow_automatic_sorting",
-                () -> Boolean.toString(getConfig().getBoolean("allow-automatic-sorting"))));
-        bStats.addCustomChart(new Metrics.SimplePie("allow_automatic_inv_sorting",
-                () -> Boolean.toString(getConfig().getBoolean("allow-automatic-inventory-sorting"))));
-
-        bStats.addCustomChart(new Metrics.SimplePie("show_message_when_using_chest",
-                () -> Boolean.toString(getConfig().getBoolean("show-message-when-using-chest"))));
-        bStats.addCustomChart(new Metrics.SimplePie("show_message_when_using_chest_and_sorting_is_enabl", () -> Boolean
-                .toString(getConfig().getBoolean("show-message-when-using-chest-and-sorting-is-enabled"))));
-        bStats.addCustomChart(new Metrics.SimplePie("show_message_again_after_logout",
-                () -> Boolean.toString(getConfig().getBoolean("show-message-again-after-logout"))));
-        bStats.addCustomChart(new Metrics.SimplePie("sorting_enabled_by_default",
-                () -> Boolean.toString(getConfig().getBoolean("sorting-enabled-by-default"))));
-        bStats.addCustomChart(new Metrics.SimplePie("inv_sorting_enabled_by_default",
-                () -> Boolean.toString(getConfig().getBoolean("inv-sorting-enabled-by-default"))));
-        bStats.addCustomChart(
-                new Metrics.SimplePie("using_matching_config_version", () -> Boolean.toString(isUsingMatchingConfig())));
-        bStats.addCustomChart(new Metrics.SimplePie("sort_time", () -> getConfig().getString("sort-time")));
-        bStats.addCustomChart(new Metrics.SimplePie("auto_generate_category_files",
-                () -> Boolean.toString(getConfig().getBoolean("auto-generate-category-files"))));
-        bStats.addCustomChart(new Metrics.SimplePie("allow_hotkeys",
-                () -> Boolean.toString(getConfig().getBoolean("allow-sorting-hotkeys"))));
-        bStats.addCustomChart(new Metrics.SimplePie("allow_additional_hotkeys",
-                () -> Boolean.toString(getConfig().getBoolean("allow-additional-hotkeys"))));
-        bStats.addCustomChart(new Metrics.SimplePie("hotkey_middle_click",
-                () -> Boolean.toString(getConfig().getBoolean("sorting-hotkeys.middle-click"))));
-        bStats.addCustomChart(new Metrics.SimplePie("hotkey_shift_click",
-                () -> Boolean.toString(getConfig().getBoolean("sorting-hotkeys.shift-click"))));
-        bStats.addCustomChart(new Metrics.SimplePie("hotkey_double_click",
-                () -> Boolean.toString(getConfig().getBoolean("sorting-hotkeys.double-click"))));
-        bStats.addCustomChart(new Metrics.SimplePie("hotkey_shift_right_click",
-                () -> Boolean.toString(getConfig().getBoolean("sorting-hotkeys.shift-right-click"))));
-        bStats.addCustomChart(new Metrics.SimplePie("hotkey_left_click",
-                () -> Boolean.toString(getConfig().getBoolean("additional-hotkeys.left-click"))));
-        bStats.addCustomChart(new Metrics.SimplePie("hotkey_right_click",
-                () -> Boolean.toString(getConfig().getBoolean("additional-hotkeys.right-click"))));
-        bStats.addCustomChart(new Metrics.SimplePie("use_permissions",
-                () -> Boolean.toString(getConfig().getBoolean("use-permissions"))));
-
     }
 
     public void incrementFingerprint() {
@@ -750,11 +552,7 @@ public class ChestSortPlugin extends JavaPlugin {
             // when "show-message-again-after-logout" is enabled, we don't care if the
             // player already saw the message
             if (!getConfig().getBoolean("show-message-again-after-logout")) {
-                if (McVersion.current().isAtLeast(1,14,4) && !playerFile.exists()) {
-                    NBTAPI.getNBT(p, "hasSeenMessage", String.valueOf(false));
-                } else {
-                    newSettings.hasSeenMessage = playerConfig.getBoolean("hasSeenMessage");
-                }
+                NBTAPI.getNBT(p, "hasSeenMessage", String.valueOf(false));
             }
 
             // Finally add the PlayerSetting object to the map
@@ -863,7 +661,6 @@ public class ChestSortPlugin extends JavaPlugin {
         getConfig().addDefault("show-message-again-after-logout", true);
         getConfig().addDefault("sorting-method", "{category},{itemsFirst},{name},{color}");
         getConfig().addDefault("allow-player-inventory-sorting", false);
-        getConfig().addDefault("check-for-updates", "true");
         getConfig().addDefault("check-interval", 4);
         getConfig().addDefault("auto-generate-category-files", true);
         getConfig().addDefault("sort-time", "close");
@@ -879,10 +676,6 @@ public class ChestSortPlugin extends JavaPlugin {
         getConfig().addDefault("log", false);
         getConfig().addDefault("allow-commands", true);
 
-        getConfig().addDefault("hook-crackshot", true);
-        getConfig().addDefault("hook-crackshot-prefix", "crackshot_weapon");
-        getConfig().addDefault("hook-inventorypages", true);
-        getConfig().addDefault("hook-minepacks", true);
         getConfig().addDefault("hook-generic", true);
         getConfig().addDefault("prevent-sorting-null-inventories", false);
 
