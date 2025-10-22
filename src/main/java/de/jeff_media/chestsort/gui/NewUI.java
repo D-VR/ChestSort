@@ -1,12 +1,12 @@
 package de.jeff_media.chestsort.gui;
 
-import com.jeff_media.morepersistentdatatypes.DataType;
 import de.jeff_media.chestsort.ChestSortPlugin;
 import de.jeff_media.chestsort.enums.Hotkey;
 import com.jeff_media.jefflib.ItemStackUtils;
 import com.jeff_media.jefflib.TextUtils;
 import de.jeff_media.chestsort.gui.tracker.CustomGUITracker;
 import de.jeff_media.chestsort.gui.tracker.CustomGUIType;
+import de.jeff_media.chestsort.utils.PersistentDataHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -53,8 +53,8 @@ public class NewUI {
                 meta.getPersistentDataContainer().set(new NamespacedKey(main,"function"),PersistentDataType.STRING, buttonName.split("-")[0]);
                 List<String> userCommands = conf.getStringList("items." + buttonName + ".commands.player");
                 List<String> adminCommands = conf.getStringList("items." + buttonName + ".commands.console");
-                meta.getPersistentDataContainer().set(new NamespacedKey(main,"user-commands"), DataType.asList(DataType.STRING), userCommands);
-                meta.getPersistentDataContainer().set(new NamespacedKey(main,"admin-commands"), DataType.asList(DataType.STRING), adminCommands);
+                PersistentDataHelper.setStringList(meta.getPersistentDataContainer(), new NamespacedKey(main,"user-commands"), userCommands);
+                PersistentDataHelper.setStringList(meta.getPersistentDataContainer(), new NamespacedKey(main,"admin-commands"), adminCommands);
                 button.setItemMeta(meta);
             }
             return button;
