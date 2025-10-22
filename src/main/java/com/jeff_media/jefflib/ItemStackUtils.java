@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import de.jeff_media.chestsort.ChestSortPlugin;
 
 /**
  * Simplified replacement for JeffLib's {@code ItemStackUtils}.
@@ -56,6 +59,8 @@ public final class ItemStackUtils {
                         .map(TextUtils::format)
                         .collect(Collectors.toList());
                 meta.setLore(lore);
+            } else if (section.isString("lore")) {
+                meta.setLore(List.of(TextUtils.format(section.getString("lore"))));
             }
 
             if (section.isInt("custom-model-data")) {
@@ -105,6 +110,13 @@ public final class ItemStackUtils {
                     } catch (IllegalArgumentException ex) {
                         Bukkit.getLogger().warning("[ChestSort] Unknown item flag in gui.yml: " + flagName);
                     }
+                }
+            }
+
+            if (section.getBoolean("prevent-stacking", false)) {
+                ChestSortPlugin plugin = ChestSortPlugin.getInstance();
+                if (plugin != null) {
+                    meta.getPersistentDataContainer().set(new NamespacedKey(plugin, "prevent-stacking"), PersistentDataType.STRING, UUID.randomUUID().toString());
                 }
             }
 
