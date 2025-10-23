@@ -1,6 +1,15 @@
+# Important
+
+This is a fork of the original ChestSort which strips out update checker functionality and the JeffLib library.
+This is because the original ChestSort Author shutdown his services, which the original code relied on to check for updates and to pull the JeffLib during compilation.
+The JeffLib replacements are probably feature incomplete, and may contain bugs.
+
+**My goal was to make the Plugin run/compilable for modern minecraft servers.**
+**I take no responsibility for any issues or data loss you experience by running this plugin.**
+
 # ChestSort
 
-1.8 to 1.19.3 compatible Minecraft-/Spigot-Plugin to allow automatic chest and inventory sorting.
+1.8 to 1.21.10 compatible Minecraft-/Spigot-Plugin to allow automatic chest and inventory sorting.
 
 ## Download & more information
 
@@ -14,6 +23,7 @@ If you want to use ChestSort as dependency for your own plugin, you can use our 
 
 ## Building .jar file
 
+Run `mvn package`.
 ~~To build the .jar file, you will need maven. Also, the CrackShot library is in no public repository, so please create a directory called `lib` and put the latest CrackShot.jar file [(available here)](https://www.spigotmc.org/resources/crackshot-guns.48301/) inside it.~~ (Not required as of ChestSort 9.6.0+)
 
 ## API
